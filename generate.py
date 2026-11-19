@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Run a prompt file through a model with vLLM and save responses keyed by prompt_id.
 
 Input  (--prompts): JSONL, one object per line: {"prompt_id": ..., "prompt": "..."}
@@ -46,11 +45,12 @@ def main():
     p.add_argument("--seed", type=int, default=None)
     p.add_argument("--tensor-parallel-size", type=int, default=1)
     p.add_argument("--gpu-memory-utilization", type=float, default=0.9)
-    p.add_argument("--max-model-len", type=int, default=None)
+    p.add_argument("--max-model-len", type=int, default=32000)
     p.add_argument("--dtype", default="auto")
     args = p.parse_args()
 
     records = load_prompts(args.prompts)
+    print("Loaded {} prompts".format(len(records)))
 
     llm = LLM(
         model=args.model,
@@ -66,6 +66,8 @@ def main():
         max_tokens=args.max_tokens,
         seed=args.seed,
     )
+
+    print("LLM {} loaded".format(args.model))
 
     if args.no_chat_template:
         outputs = llm.generate([r["prompt"] for r in records], sampling)
